@@ -1,0 +1,11 @@
+{
+	"body": {
+		"candidateId" :"5",
+		"category":"Java",
+		"jobPostion":"Java dev",
+		"DOE":"26/4/2017",
+		"testStatus": "test not taken",
+		"startTime":"30",
+		"paperType":"b-type"
+	}
+}
