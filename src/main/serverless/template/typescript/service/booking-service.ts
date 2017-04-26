@@ -23,9 +23,9 @@ export interface BookingService {
 @Injectable()
 export class BookingServiceImpl {
 
-    private bookingObj:any={
+    public bookingObj:any={
         "candidateId":"",
-        "candidateName":"",
+        "fullName":"",
         "testStatus":"",
         "email":"",
         "category":"",
@@ -335,17 +335,19 @@ export class BookingServiceImpl {
      data.forEach((item)=>{
          let newArray = res.filter((id)=>{ 
              return(id.candidateId === item.candidateId)});
-         console.log("new array", newArray);
-         console.log("item = ",item);
-         this.bookingObj.candidateId = item.candidateId;
-         this.bookingObj.testStatus = item.testStatus;
-         this.bookingObj.category = item.category;
-         this.bookingObj.candidateName = `${newArray.firstName} ${newArray.lastName}`;
-         this.bookingObj.email = newArray.email;
-         resultArray.push(this.bookingObj);
-         console.log(" result", resultArray);
+         console.log("new array", newArray[0]);
+         console.log("item = ",item.candidateId);
+         let bookinginfo = new Booking();
+         bookinginfo.candidateId = item.candidateId;
+        bookinginfo.candidateId = item.candidateId;
+        bookinginfo.testStatus = item.testStatus;
+        bookinginfo.category = item.category;
+        bookinginfo.fullName = `${newArray[0].firstName} ${newArray[0].lastName}`;
+        bookinginfo.email = newArray[0].email;
+        resultArray.push(bookinginfo);
+         console.log(" result", bookinginfo);
      })
-    observer.next(data);
+    observer.next(resultArray);
     observer.complete();
    }         
     });

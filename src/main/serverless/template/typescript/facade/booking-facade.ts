@@ -55,7 +55,7 @@ export class BookingFacade {
 
         return this.bookingService.getCandidateByBatch(data)
             .map((bookings) => {
-               // console.log(bookings);
+                console.log("map = ",bookings);
                 return {
                     bookings: bookings.map(this.mapBookingToDto)
                 }
@@ -63,7 +63,7 @@ export class BookingFacade {
     }
 
     private mapBookingToDto(booking: Booking): BookingDto {
-        console.log("in mapBookingToDto");
+        console.log("in mapBookingToDto", booking);
         return {
            candidateId: booking.candidateId,
     category: booking.category,
@@ -72,8 +72,8 @@ export class BookingFacade {
     testStatus: booking.testStatus,
     startTime: 5,
     paperType:"",
-    candidateFullName:"",
-    candidateMailId:""
+    candidateFullName:booking.fullName,
+    candidateMailId:booking.email
         }
     }
 
