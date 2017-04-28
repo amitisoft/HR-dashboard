@@ -5,5 +5,4 @@ import { ExecutionContextImpl } from "./typescript/context/execution-context-imp
 
 // exports.getAllCandidatesFunction = ExecutionContextImpl.createHttpHandler(AppProviders, GetCandidateHandler.getAllCandidates);
 // exports.findCandiateByIdFunction = ExecutionContextImpl.createHttpHandler(AppProviders, GetCandidateHandler.findCandidateById);
-
-exports.updateBooking = ExecutionContextImpl.createHttpHandler(AppProviders, GetCandidateHandler.testCheck);
+exports.startTestDashboard = ExecutionContextImpl.createHttpHandler(AppProviders, GetCandidateHandler.startTestDashboard);

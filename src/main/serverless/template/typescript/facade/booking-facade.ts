@@ -11,49 +11,18 @@ export class BookingFacade {
     constructor(private bookingService: BookingServiceImpl) {
     }
 
-    // getAll(): Observable<BookingsDto> {
-    //     console.log("in BookingFacade getAll()");
-
-    //     return this.bookingService.getBookingWhoNotTakenTest()
-    //         .map((bookings) => {
-    //             return {
-    //                 bookings: bookings.map(this.mapBookingToDto)
-    //             }
-    //         });
-    // }
-
-    // private mapBookingToDto(booking: Booking): BookingDto {
-    //     console.log("in mapBookingToDto");
-    //     return {
-    //        candidateId: "",
-    //        category:"",
-
-    //     }
-    // }
-
-
-    // createBooking(data: any) : Observable<Booking> {
-    //     //validate data as per business logic
-    //     return this.bookingService.create(data);
-    // }
-
-
-    updateBooking(data: any) :Observable<Booking> {
-        return this.bookingService.update(data);
+    updateBookingAfterStartTest(data: any) :Observable<Booking> {
+        return this.bookingService.updateBookingAfterStartTest(data);
     }
 
-    getBookingWhoNotTakenTest() :Observable<Booking[]> {
-        return this.bookingService.getAllBookings();
+    getWhoNotTakenTest(data:any) :Observable<Booking[]> {
+        return this.bookingService.getWhoNotTakenTest(data);
     }
 
-    // findBooking(bookingId: string) : Observable<Booking> {
-    //     return this.bookingService.find(candidateId);
-    // }
-
-    getAllBookings(data:any): Observable<BookingsDto> {
+    getAllCandidateInfoWhoNotTakenTest(data:any): Observable<BookingsDto> {
              console.log("in BookingFacade getAll()");
 
-        return this.bookingService.getCandidateByBatch(data)
+        return this.bookingService.getAllCandidateInfoWhoNotTakenTest(data)
             .map((bookings) => {
                 console.log("map = ",bookings);
                 return {
@@ -64,17 +33,20 @@ export class BookingFacade {
 
     private mapBookingToDto(booking: Booking): BookingDto {
         console.log("in mapBookingToDto", booking);
+        let formate = {year:"numeric", month:"numeric",day:"numeric"};
+        let date = new Date(new Date().getUTCDate());
         return {
-           candidateId: booking.candidateId,
-    category: booking.category,
-    jobPostion: booking.jobPostion,
-    DOE: "",
-    testStatus: booking.testStatus,
-    startTime: 5,
-    paperType:"",
-    candidateFullName:booking.fullName,
-    candidateMailId:booking.email
-        }
+                candidateId: booking.candidateId,
+                category: booking.category,
+                jobPostion: booking.jobPostion,
+                DOE: new Date().toDateString(),
+                testStatus: booking.testStatus,
+                startTime: 5,
+                paperType:"",
+                candidateFullName:booking.fullName,
+                candidateMailId:booking.email,
+                bookingId : booking.bookingId
+            }
     }
 
 

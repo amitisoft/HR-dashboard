@@ -8,5 +8,6 @@ export class Booking {
     paperType:string;
     fullName:string;
     email:string;
+    bookingId:string;
 }
 

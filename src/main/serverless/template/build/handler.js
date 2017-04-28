@@ -48,11 +48,11 @@ module.exports =
 	"use strict";
 	__webpack_require__(1);
 	var get_candidate_handler_1 = __webpack_require__(2);
-	var app_context_1 = __webpack_require__(350);
-	var execution_context_impl_1 = __webpack_require__(351);
+	var app_context_1 = __webpack_require__(351);
+	var execution_context_impl_1 = __webpack_require__(352);
 	// exports.getAllCandidatesFunction = ExecutionContextImpl.createHttpHandler(AppProviders, GetCandidateHandler.getAllCandidates);
 	// exports.findCandiateByIdFunction = ExecutionContextImpl.createHttpHandler(AppProviders, GetCandidateHandler.findCandidateById);
-	exports.updateBooking = execution_context_impl_1.ExecutionContextImpl.createHttpHandler(app_context_1.AppProviders, get_candidate_handler_1.GetCandidateHandler.testCheck);
+	exports.startTestDashboard = execution_context_impl_1.ExecutionContextImpl.createHttpHandler(app_context_1.AppProviders, get_candidate_handler_1.GetCandidateHandler.startTestDashboard);
 
 
 /***/ }),
@@ -1223,12 +1223,17 @@ module.exports =
 	        //         httpContext.fail(err, 500);
 	        //     });
 	    };
-	    GetCandidateHandler.updateBooking = function (httpContext, injector) {
+	    /**
+	     * updateBookingAfterStartTest
+	     * @param httpContext
+	     * @param injector
+	     */
+	    GetCandidateHandler.updateBookingAfterStartTest = function (httpContext, injector) {
 	        var pathParameters = httpContext.getPathParameters();
 	        console.log(JSON.stringify(pathParameters));
 	        var data = httpContext.getRequestBody();
 	        console.log("pathParameters = ", data);
-	        injector.get(booking_facade_1.BookingFacade).updateBooking(data)
+	        injector.get(booking_facade_1.BookingFacade).updateBookingAfterStartTest(data)
 	            .subscribe(function (result) {
 	            httpContext.ok(200, result);
 	        }, function (err) {
@@ -1247,15 +1252,13 @@ module.exports =
 	            httpContext.fail(err, 500);
 	        });
 	    };
-	    GetCandidateHandler.testCheck = function (httpContext, injector) {
+	    GetCandidateHandler.startTestDashboard = function (httpContext, injector) {
 	        var pathParameters = httpContext.getPathParameters();
 	        console.log(JSON.stringify(pathParameters));
-	        var data = httpContext.getRequestBody();
-	        console.log("data = ", data);
-	        injector.get(booking_facade_1.BookingFacade).getBookingWhoNotTakenTest()
+	        injector.get(booking_facade_1.BookingFacade).getWhoNotTakenTest(pathParameters)
 	            .subscribe(function (result) {
 	            console.log("myresult = ", result);
-	            injector.get(booking_facade_1.BookingFacade).getAllBookings(result)
+	            injector.get(booking_facade_1.BookingFacade).getAllCandidateInfoWhoNotTakenTest(result) //getAllBookings
 	                .subscribe(function (result1) {
 	                console.log("myresult = ", result1);
 	                httpContext.ok(200, result1);
@@ -17642,7 +17645,7 @@ module.exports =
 	        console.log("data received " + data.candidateId);
 	        var documentClient = new DocumentClient();
 	        var params = {
-	            TableName: "candidate1",
+	            TableName: "candidate",
 	            Key: {
 	                candidateId: data.candidateId,
 	            },
@@ -34789,58 +34792,38 @@ module.exports =
 	    function BookingFacade(bookingService) {
 	        this.bookingService = bookingService;
 	    }
-	    // getAll(): Observable<BookingsDto> {
-	    //     console.log("in BookingFacade getAll()");
-	    //     return this.bookingService.getBookingWhoNotTakenTest()
-	    //         .map((bookings) => {
-	    //             return {
-	    //                 bookings: bookings.map(this.mapBookingToDto)
-	    //             }
-	    //         });
-	    // }
-	    // private mapBookingToDto(booking: Booking): BookingDto {
-	    //     console.log("in mapBookingToDto");
-	    //     return {
-	    //        candidateId: "",
-	    //        category:"",
-	    //     }
-	    // }
-	    // createBooking(data: any) : Observable<Booking> {
-	    //     //validate data as per business logic
-	    //     return this.bookingService.create(data);
-	    // }
-	    BookingFacade.prototype.updateBooking = function (data) {
-	        return this.bookingService.update(data);
+	    BookingFacade.prototype.updateBookingAfterStartTest = function (data) {
+	        return this.bookingService.updateBookingAfterStartTest(data);
 	    };
-	    BookingFacade.prototype.getBookingWhoNotTakenTest = function () {
-	        return this.bookingService.getAllBookings();
+	    BookingFacade.prototype.getWhoNotTakenTest = function (data) {
+	        return this.bookingService.getWhoNotTakenTest(data);
 	    };
-	    // findBooking(bookingId: string) : Observable<Booking> {
-	    //     return this.bookingService.find(candidateId);
-	    // }
-	    BookingFacade.prototype.getAllBookings = function (data) {
+	    BookingFacade.prototype.getAllCandidateInfoWhoNotTakenTest = function (data) {
 	        var _this = this;
 	        console.log("in BookingFacade getAll()");
-	        return this.bookingService.getCandidateByBatch(data)
+	        return this.bookingService.getAllCandidateInfoWhoNotTakenTest(data)
 	            .map(function (bookings) {
-	            // console.log(bookings);
+	            console.log("map = ", bookings);
 	            return {
 	                bookings: bookings.map(_this.mapBookingToDto)
 	            };
 	        });
 	    };
 	    BookingFacade.prototype.mapBookingToDto = function (booking) {
-	        console.log("in mapBookingToDto");
+	        console.log("in mapBookingToDto", booking);
+	        var formate = { year: "numeric", month: "numeric", day: "numeric" };
+	        var date = new Date(new Date().getUTCDate());
 	        return {
 	            candidateId: booking.candidateId,
 	            category: booking.category,
 	            jobPostion: booking.jobPostion,
-	            DOE: "",
+	            DOE: new Date().toDateString(),
 	            testStatus: booking.testStatus,
 	            startTime: 5,
 	            paperType: "",
-	            candidateFullName: "",
-	            candidateMailId: ""
+	            candidateFullName: booking.fullName,
+	            candidateMailId: booking.email,
+	            bookingId: booking.bookingId
 	        };
 	    };
 	    return BookingFacade;
@@ -34868,27 +34851,22 @@ module.exports =
 	};
 	var rxjs_1 = __webpack_require__(39);
 	var core_1 = __webpack_require__(4);
+	var booking_1 = __webpack_require__(350);
 	var aws_sdk_1 = __webpack_require__(347);
+	// import { StartTestBooking} from "../domain/start-test-booking"
 	var DocumentClient = aws_sdk_1.DynamoDB.DocumentClient;
-	// var uuid = require('uuid');
 	var AWS = __webpack_require__(347);
 	AWS.config.update({
 	    region: "us-east-1"
 	});
 	var BookingServiceImpl = (function () {
 	    function BookingServiceImpl() {
-	        this.bookingObj = {
-	            "candidateId": "",
-	            "candidateName": "",
-	            "testStatus": "",
-	            "email": "",
-	            "category": "",
-	            "paperType": "",
-	            "DOE": "",
-	            "jobPostion": ""
-	        };
 	    }
-	    BookingServiceImpl.prototype.update = function (data) {
+	    /**
+	     * updateBookingAfterStartTest
+	     * @param data
+	     */
+	    BookingServiceImpl.prototype.updateBookingAfterStartTest = function (data) {
 	        console.log("in CandidateServiceImpl update()");
 	        console.log("data received " + data.category);
 	        console.log("data received " + data.jobPostion);
@@ -34896,25 +34874,27 @@ module.exports =
 	        console.log("data received " + data.paperType);
 	        var documentClient = new DocumentClient();
 	        var params = {
-	            TableName: "booking1",
+	            TableName: "booking",
 	            Key: {
-	                candidateId: data.candidateId,
+	                bookingId: data.bookingId,
 	            },
 	            ExpressionAttributeNames: {
 	                '#ca': 'category',
 	                '#jp': 'jobPostion',
 	                '#DOE': 'DOE',
 	                '#ts': 'testStatus',
-	                '#pt': 'paperType'
+	                '#pt': 'paperType',
+	                '#cid': 'candidateId'
 	            },
 	            ExpressionAttributeValues: {
 	                ':ca': data.category,
 	                ':jp': data.jobPostion,
 	                ':DOE': data.DOE,
 	                ':ts': data.testStatus,
-	                ':pt': data.paperType
+	                ':pt': data.paperType,
+	                ':cid': data.candidateId
 	            },
-	            UpdateExpression: 'SET #ca = :ca,#jp=:jp, #DOE = :DOE, #ts= :ts, #pt =:pt',
+	            UpdateExpression: 'SET #ca = :ca,#jp=:jp, #DOE = :DOE, #ts= :ts, #pt =:pt, #cid=:cid',
 	            ReturnValues: 'ALL_NEW',
 	        };
 	        return rxjs_1.Observable.create(function (observer) {
@@ -34930,210 +34910,71 @@ module.exports =
 	            });
 	        });
 	    };
-	    BookingServiceImpl.prototype.getBookingWhoNotTakenTest = function () {
-	        var _this = this;
-	        var queryParams = {
-	            "TableName": "booking",
-	            "IndexName": "testStatusGSI",
-	            "KeyConditionExpression": "#testStatus = :v_test",
-	            ExpressionAttributeNames: {
-	                "#testStatus": "testStatus"
-	            },
-	            "ExpressionAttributeValues": {
-	                ":v_test": "test not taken"
-	            },
-	            "ProjectionExpression": "candidateId, category, testStatus",
-	            "ScanIndexForward": false
-	        };
-	        var documentClient = new DocumentClient();
-	        var candidateIdArray = [];
-	        return rxjs_1.Observable.create(function (observer) {
-	            console.log("Executing query with parameters " + queryParams);
-	            documentClient.query(queryParams, function (err, data) {
-	                if (err) {
-	                    observer.error(err);
-	                    throw err;
-	                }
-	                console.log("data items receieved " + data.Items.length);
-	                if (data.Items.length === 0) {
-	                    console.log("no data received for getAll candidates");
-	                    observer.complete();
-	                    return;
-	                }
-	                data.Items.forEach(function (item) {
-	                    console.log("candidate Id " + item.candidateId);
-	                    console.log("candidate category " + item.category);
-	                    console.log(item);
-	                    console.log("calling candidateId");
-	                    candidateIdArray.push(item.candidateId);
-	                    //     this.getCandidateInfo(item.candidateId);
-	                    // const params = {
-	                    //     Key: {
-	                    //              "candidateId": item.candidateId
-	                    //          }, 
-	                    //     TableName: "candidate"
-	                    //     };
-	                    //         const documentClient = new DocumentClient();
-	                    //          documentClient.get(params, function(err, data) {
-	                    //                 if (err){
-	                    //                         console.log(err, err.stack);
-	                    //                         }  
-	                    //                 else{
-	                    //                     console.log(data);
-	                    //                     // item.candidateMailId = data.Item.email;
-	                    //                     // item.candidateName = `${data.Item.firstName} ${data.Item.lastName}`;
-	                    //                     }             
-	                    //                 });
-	                });
-	                // const arrayCandidateID = data.Items.filter(x =>{
-	                //     return x.candidateId;
-	                // });    
-	                // console.log(typeof data.Items); 
-	                // console.log(arrayCandidateID);
-	                _this.getCandidateInfo(candidateIdArray);
-	                observer.next(data.Items);
-	                //   this.getCandidateInfo(item.candidateId);
-	                observer.complete();
-	            });
-	        });
-	    };
-	    BookingServiceImpl.prototype.getCandidateInfo = function (candidateId) {
-	        var candidateInfo = "";
-	        console.log("In get candidate", candidateId.length);
-	        for (var i = 0; i < candidateId.length; i++) {
-	            var params = {
-	                Key: {
-	                    "candidateId": candidateId[i]
-	                },
-	                TableName: "candidate"
-	            };
-	            var documentClient = new DocumentClient();
-	            documentClient.get(params, function (err, data) {
-	                if (err) {
-	                    console.log(err, err.stack);
-	                }
-	                else {
-	                    console.log(data);
-	                    candidateInfo += data.Item;
-	                }
-	            });
-	        }
-	        console.log("final candidate", candidateInfo);
-	    };
-	    // }
 	    /**
 	     * get the data who are not taken the test.......
+	     * data whichcontains last data of previous query
 	     */
-	    BookingServiceImpl.prototype.getAllBookings = function () {
-	        //console.log("in CandidateServiceImpl getAll()");
+	    BookingServiceImpl.prototype.getWhoNotTakenTest = function (lastEvaluatedKey) {
 	        var queryParams = {
-	            "TableName": "booking",
-	            "IndexName": "testStatusGSI",
-	            "KeyConditionExpression": "#testStatus = :v_test",
+	            TableName: "booking",
+	            IndexName: "testStatusGSI",
+	            KeyConditionExpression: "#testStatus = :v_test",
 	            ExpressionAttributeNames: {
 	                "#testStatus": "testStatus"
 	            },
-	            "ExpressionAttributeValues": {
+	            ExpressionAttributeValues: {
 	                ":v_test": "test not taken"
 	            },
-	            "ProjectionExpression": "candidateId, category,testStatus",
-	            "ScanIndexForward": false
+	            Limit: 2,
+	            ProjectionExpression: "candidateId, category,testStatus,bookingId",
+	            ScanIndexForward: false
 	        };
+	        if (lastEvaluatedKey) {
+	            console.log("-----------------------------with data-----------------------");
+	            console.log(" data-------------", lastEvaluatedKey.candidateId);
+	            queryParams.ExclusiveStartKey = { bookingId: lastEvaluatedKey.bookingId,
+	                testStatus: lastEvaluatedKey.testStatus,
+	                candidateId: lastEvaluatedKey.candidateId };
+	        }
+	        else {
+	            console.log("----------------------------without data----------------------");
+	        }
 	        var documentClient = new DocumentClient();
 	        return rxjs_1.Observable.create(function (observer) {
 	            documentClient.query(queryParams, function (err, data) {
-	                console.log("did we get error " + err);
 	                if (err) {
 	                    observer.error(err);
 	                    throw err;
 	                }
 	                console.log("data items receieved " + data.Items.length);
 	                if (data.Items.length === 0) {
-	                    console.log("no data received for getAll candidates");
 	                    observer.complete();
 	                    return;
 	                }
-	                // data.Items.forEach((item) => {
-	                //  console.log(`candidate Id ${item.candidateId}`);
-	                // const params = {
-	                //     Key: {
-	                //              "candidateId": item.candidateId
-	                //          }, 
-	                //     TableName: "candidate"
-	                //     };
-	                //         const documentClient = new DocumentClient();
-	                //          documentClient.get(params, function(err, data1) {
-	                //                 if (err){
-	                //                         console.log(err, err.stack);
-	                //                         }  
-	                //                 else{
-	                //                     console.log(data1);
-	                //                      let arraydata = data.Items.filter(x=> x.candidateId === item.candidateId);
-	                //                      console.log(arraydata);
-	                //                     // item.candidateMailId = data.Item.email;
-	                //                     // item.candidateName = `${data.Item.firstName} ${data.Item.lastName}`;
-	                //                     }             
-	                //                 });
-	                //    });
-	                //  console.log(this.getCandidateByBatch(data.Items));
+	                console.log("LastEvaluatedKey=", data.LastEvaluatedKey);
 	                observer.next((data.Items));
-	                //observer.next(data.Items);
 	                observer.complete();
 	            });
 	        });
 	    };
 	    /**
-	     * search candidate by get item
-	     * filter
+	     * { bookingId: '1',
+	  testStatus: 'test not taken',
+	  candidateId: '5' }
 	     */
-	    BookingServiceImpl.prototype.getCandidateInformation = function (data) {
-	        var result = {};
-	        data.forEach(function (item) {
-	            var params = {
-	                Key: {
-	                    "candidateId": item.candidateId
-	                },
-	                ProjectionExpression: "email,firstName,lastName",
-	                TableName: "candidate"
-	            };
-	            var documentClient = new DocumentClient();
-	            documentClient.get(params, function (err, data1) {
-	                if (err) {
-	                    console.log(err, err.stack);
-	                    return "error";
-	                }
-	                else {
-	                    console.log(data1);
-	                    // data1.forEach((candidate) =>{
-	                    // item.candidateMailId = candidate.email;
-	                    //  item.candidateName = `${candidate.firstName} ${candidate.lastName}`;
-	                    // });
-	                    var arraydata = data.filter(function (x) { return x.candidateId === item.candidateId; });
-	                    // console.log(arraydata);
-	                    // console.log(data1.Item.email);
-	                    //  item.candidateMailId = "candidate@gmail.com";//data1.Item.email;
-	                    //  item.candidateName = "candidate Name";//`${data1.Item.firstName} ${data1.Item.lastName}`;
-	                    result += item;
-	                    console.log(JSON.stringify(item));
-	                }
-	            });
-	        });
-	        console.log("In get candidate Information");
-	        return data;
-	    };
 	    /**
 	     * search candidate information by Batch item
 	     *
 	     */
-	    BookingServiceImpl.prototype.getCandidateByBatch = function (data) {
-	        // console.log("in batch id");
+	    BookingServiceImpl.prototype.getAllCandidateInfoWhoNotTakenTest = function (data) {
 	        var candidateKey = [];
 	        data.forEach(function (item) {
+	            console.log("in side for each");
 	            var myObj = { "candidateId": "" };
 	            myObj.candidateId = item.candidateId;
 	            candidateKey.push(myObj);
 	        });
-	        //  console.log(candidateKey);
+	        console.log("out side");
 	        var params = {
 	            RequestItems: {
 	                "candidate": {
@@ -35145,29 +34986,33 @@ module.exports =
 	        var documentClient = new DocumentClient();
 	        return rxjs_1.Observable.create(function (observer) {
 	            documentClient.batchGet(params, function (err, data1) {
-	                var _this = this;
 	                if (err) {
 	                    observer.error(err);
 	                    throw err;
 	                }
 	                else {
 	                    var resultArray_1 = [];
-	                    console.log("booking data = ", data);
+	                    // console.log("booking data = ",data);
 	                    var res_1 = (JSON.parse(JSON.stringify(data1.Responses))).candidate;
-	                    console.log("res = ", res_1);
+	                    //  console.log("res = ",res);
 	                    data.forEach(function (item) {
 	                        var newArray = res_1.filter(function (id) {
 	                            return (id.candidateId === item.candidateId);
 	                        });
-	                        console.log("new array", newArray);
-	                        console.log("item = ", item);
-	                        _this.bookingObj.candidateId = item.candidateId;
-	                        _this.bookingObj.testStatus = item.testStatus;
-	                        _this.bookingObj.category = item.category;
-	                        _this.bookingObj.candidateName = newArray.firstName + " " + newArray.lastName;
-	                        _this.bookingObj.email = newArray.email;
-	                        resultArray_1.push(_this.bookingObj);
-	                        console.log(" result", resultArray_1);
+	                        //  console.log("new array", newArray[0]);
+	                        //  console.log("item = ",item.candidateId);
+	                        // if (newArray != undefined){
+	                        var bookinginfo = new booking_1.Booking();
+	                        bookinginfo.candidateId = item.candidateId;
+	                        bookinginfo.candidateId = item.candidateId;
+	                        bookinginfo.testStatus = item.testStatus;
+	                        bookinginfo.bookingId = item.bookingId;
+	                        bookinginfo.category = item.category;
+	                        bookinginfo.fullName = newArray[0].firstName + " " + newArray[0].lastName;
+	                        bookinginfo.email = newArray[0].email;
+	                        resultArray_1.push(bookinginfo);
+	                        //  console.log(" result", bookinginfo);
+	                        //     }
 	                    });
 	                    observer.next(resultArray_1);
 	                    observer.complete();
@@ -35182,20 +35027,23 @@ module.exports =
 	    __metadata("design:paramtypes", [])
 	], BookingServiceImpl);
 	exports.BookingServiceImpl = BookingServiceImpl;
-	// {
-	//     "TableName": "GameScores",
-	//     "IndexName": "GameTitleIndex",
-	//     "KeyConditionExpression": "GameTitle = :v_title",
-	//     "ExpressionAttributeValues": {
-	//         ":v_title": {"S": "Meteor Blasters"}
-	//     },
-	//     "ProjectionExpression": "UserId, TopScore",
-	//     "ScanIndexForward": false
-	// } 
 
 
 /***/ }),
 /* 350 */
+/***/ (function(module, exports) {
+
+	"use strict";
+	var Booking = (function () {
+	    function Booking() {
+	    }
+	    return Booking;
+	}());
+	exports.Booking = Booking;
+
+
+/***/ }),
+/* 351 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -35212,12 +35060,12 @@ module.exports =
 
 
 /***/ }),
-/* 351 */
+/* 352 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
 	var core_1 = __webpack_require__(4);
-	var http_context_impl_1 = __webpack_require__(352);
+	var http_context_impl_1 = __webpack_require__(353);
 	var ExecutionContextImpl = (function () {
 	    function ExecutionContextImpl() {
 	    }
@@ -35244,7 +35092,7 @@ module.exports =
 
 
 /***/ }),
-/* 352 */
+/* 353 */
 /***/ (function(module, exports) {
 
 	"use strict";

@@ -21,8 +21,8 @@ provider:
   runtime: nodejs4.3
   profile: shortlist-serverless-template-dev
   environment:
-    DYNAMODB_TABLE: "candidate1"
-    BOOKING_TABLE: "booking1"
+    DYNAMODB_TABLE: "candidate"
+    BOOKING_TABLE: "booking"
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -32,12 +32,30 @@ provider:
         - dynamodb:PutItem
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
+        - dynamodb:BatchGetItem
       Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
 
     - Effect: Allow
       Action:
         - execute-api:Invoke
       Resource: "arn:aws:execute-api:us-east-1:*:*"
+
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+        - dynamodb:BatchGetItem
+      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.BOOKING_TABLE}/*"
+
+    - Effect: Allow
+      Action:
+        - execute-api:Invoke
+      Resource: "arn:aws:execute-api:us-east-1:*:*"
+
 
 functions:
 
@@ -54,10 +72,23 @@ functions:
 #          rate: rate(10 minutes)
 #          enabled: true
 
+  startTestDashboard:
+    handler: handler.startTestDashboard
+    events:
+      - http:
+          path: api/starttestdashboard/candidateId/{candidateId}/bookingId/{bookingId}/testStatus/{testStatus}
+          method: get
+         # authorizer: arn:aws:lambda:us-east-1:151610303354:function:hr-auth-master-dev-authorize
+       #   resultTtlInSeconds: 0
+          cors: true
+#      - schedule:
+#          rate: rate(10 minutes)
+#          enabled: true
+
 
 resources:
   Resources:
-     candidate1:
+     candidate:
           Type: 'AWS::DynamoDB::Table'
           DeletionPolicy: Retain
           Properties:
@@ -72,7 +103,7 @@ resources:
               ReadCapacityUnits: 2
               WriteCapacityUnits: 2
 
-     booking1:
+     booking:
           Type: 'AWS::DynamoDB::Table'
           DeletionPolicy: Retain
           Properties:
@@ -80,10 +111,12 @@ resources:
             AttributeDefinitions:
               - AttributeName: candidateId
                 AttributeType: S
+              - AttributeName: bookingId
+                AttributeType: S
               - AttributeName: testStatus
                 AttributeType: S
             KeySchema:
-              - AttributeName: candidateId
+              - AttributeName: bookingId
                 KeyType: HASH
             ProvisionedThroughput:
               ReadCapacityUnits: 2

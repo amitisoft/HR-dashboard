@@ -56,7 +56,7 @@ export class CandidateServiceImpl {
 
         const documentClient = new DocumentClient();
         const params = {
-            TableName: "candidate1",
+            TableName: "candidate",
             Key: {
                 candidateId: data.candidateId,
             },

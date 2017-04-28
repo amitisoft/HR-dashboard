@@ -1,4 +1,5 @@
 export class BookingDto {
+    bookingId:string;
     candidateId: string;
     category: string;
     jobPostion: string;

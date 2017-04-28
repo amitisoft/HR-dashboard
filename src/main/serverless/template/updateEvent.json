@@ -1,11 +1,12 @@
 {
 	"body": {
-		"candidateId" :"5",
-		"category":"Java",
-		"jobPostion":"Java dev",
+		"candidateId" :"10",
+		"category":"QA",
+		"jobPostion":"qa",
 		"DOE":"26/4/2017",
 		"testStatus": "test not taken",
 		"startTime":"30",
-		"paperType":"b-type"
+		"paperType":"b-type",
+		"bookingId":"10"
 	}
 }
